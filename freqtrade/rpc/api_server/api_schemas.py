@@ -5,7 +5,7 @@ from pydantic import AwareDatetime, BaseModel, RootModel, SerializeAsAny, model_
 
 from freqtrade.constants import DL_DATA_TIMEFRAMES, IntOrInf
 from freqtrade.enums import MarginMode, OrderTypeValues, SignalDirection, TradingMode
-from freqtrade.ft_types import ValidExchangesType
+from freqtrade.ft_types import AnnotationType, ValidExchangesType
 from freqtrade.rpc.api_server.webserver_bgwork import ProgressTask
 
 
@@ -163,9 +163,20 @@ class Profit(BaseModel):
     max_drawdown_start_timestamp: int
     max_drawdown_end: str
     max_drawdown_end_timestamp: int
+    current_drawdown: float
+    current_drawdown_abs: float
+    current_drawdown_high: float
+    current_drawdown_start: str
+    current_drawdown_start_timestamp: int
     trading_volume: float | None = None
     bot_start_timestamp: int
     bot_start_date: str
+
+
+class ProfitAll(BaseModel):
+    all: Profit
+    long: Profit | None = None
+    short: Profit | None = None
 
 
 class SellReason(BaseModel):
@@ -539,6 +550,7 @@ class PairHistory(BaseModel):
     columns: list[str]
     all_columns: list[str] = []
     data: SerializeAsAny[list[Any]]
+    annotations: list[AnnotationType] | None = None
     length: int
     buy_signals: int
     sell_signals: int
@@ -637,3 +649,16 @@ class Health(BaseModel):
     bot_start_ts: int | None = None
     bot_startup: datetime | None = None
     bot_startup_ts: int | None = None
+
+
+class CustomDataEntry(BaseModel):
+    key: str
+    type: str
+    value: Any
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
+class ListCustomData(BaseModel):
+    trade_id: int
+    custom_data: list[CustomDataEntry]

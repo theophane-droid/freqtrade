@@ -125,11 +125,11 @@ class LookaheadAnalysis(BaseAnalysis):
 
         backtesting = Backtesting(prepare_data_config, self.exchange)
         self.exchange = backtesting.exchange
+        self.local_config["candle_type_def"] = prepare_data_config["candle_type_def"]
         self._fee = backtesting.fee
         backtesting._set_strategy(backtesting.strategylist[0])
 
         varholder.data, varholder.timerange = backtesting.load_bt_data()
-        backtesting.load_bt_data_detail()
         varholder.timeframe = backtesting.timeframe
 
         varholder.indicators = backtesting.strategy.advise_all_indicators(varholder.data)
@@ -236,7 +236,7 @@ class LookaheadAnalysis(BaseAnalysis):
                 return None
             if "force_exit" in result_row["exit_reason"]:
                 logger.info(
-                    "found force-exit in pair: {result_row['pair']}, "
+                    f"found force-exit in pair: {result_row['pair']}, "
                     f"timerange:{result_row['open_date']}-{result_row['close_date']}, "
                     f"idx: {idx}, skipping this one to avoid a false-positive."
                 )

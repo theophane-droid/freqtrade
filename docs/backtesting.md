@@ -5,6 +5,8 @@ This page explains how to validate your strategy performance by using Backtestin
 Backtesting requires historic data to be available.
 To learn how to get data for the pairs and exchange you're interested in, head over to the [Data Downloading](data-download.md) section of the documentation.
 
+Backtesting is also available in [webserver mode](freq-ui.md#backtesting), which allows you to run backtests via the web interface.
+
 ## Backtesting command reference
 
 --8<-- "commands/backtesting.md"
@@ -103,11 +105,13 @@ Only use this if you're sure you'll not want to plot or analyze your results fur
 
 ---
 
-Exporting trades to file specifying a custom filename
+Exporting trades to file specifying a custom directory
 
 ```bash
-freqtrade backtesting --strategy backtesting --export trades --export-filename=backtest_samplestrategy.json
+freqtrade backtesting --strategy backtesting --export trades --export-filename=user_data/custom-backtest-results
 ```
+
+---
 
 Please also read about the [strategy startup period](strategy-customization.md#strategy-startup-period).
 
@@ -209,6 +213,7 @@ A backtesting result will look like that:
 | Sortino                     | 1.88                |
 | Sharpe                      | 2.97                |
 | Calmar                      | 6.29                |
+| SQN                         | 2.45                |
 | Profit factor               | 1.11                |
 | Expectancy (Ratio)          | -0.15 (-0.05)       |
 | Avg. stake amount           | 0.001      BTC      |
@@ -315,8 +320,10 @@ It contains some useful key metrics about performance of your strategy on backte
 | Sortino                     | 1.88                |
 | Sharpe                      | 2.97                |
 | Calmar                      | 6.29                |
+| SQN                         | 2.45                |
 | Profit factor               | 1.11                |
 | Expectancy (Ratio)          | -0.15 (-0.05)       |
+| Avg. daily profit           | 0.0001     BTC      |
 | Avg. stake amount           | 0.001      BTC      |
 | Total trade volume          | 0.429      BTC      |
 |                             |                     |
@@ -368,10 +375,13 @@ It contains some useful key metrics about performance of your strategy on backte
 - `Sortino`: Annualized Sortino ratio.
 - `Sharpe`: Annualized Sharpe ratio.
 - `Calmar`: Annualized Calmar ratio.
+- `SQN`: System Quality Number (SQN) - by Van Tharp.
 - `Profit factor`: profit / loss.
+- `Expectancy (Ratio)`: Expectancy ratio, which is the average profit or loss per trade. A negative expectancy ratio means that your strategy is not profitable.
+- `Avg. daily profit`: Average profit per day, calculated as `(Total Profit / Backtest Days)`.
 - `Avg. stake amount`: Average stake amount, either `stake_amount` or the average when using dynamic stake amount.
 - `Total trade volume`: Volume generated on the exchange to reach the above profit.
-- `Best Pair` / `Worst Pair`: Best and worst performing pair, and it's corresponding `Tot Profit %`.
+- `Best Pair` / `Worst Pair`: Best and worst performing pair (based on absolute profit), and it's corresponding `Tot Profit %`.
 - `Best Trade` / `Worst Trade`: Biggest single winning trade and biggest single losing trade.
 - `Best day` / `Worst day`: Best and worst day based on daily profit.
 - `Days win/draw/lose`: Winning / Losing days (draws are usually days without closed trade).
@@ -431,6 +441,24 @@ To save time, by default backtest will reuse a cached result from within the las
 
 To further analyze your backtest results, freqtrade will export the trades to file by default.
 You can then load the trades to perform further analysis as shown in the [data analysis](strategy_analysis_example.md#load-backtest-results-to-pandas-dataframe) backtesting section.
+
+Also, you can use freqtrade in [webserver mode](freq-ui.md#backtesting) to visualize the backtest results in a web interface.
+This mode also allows you to load existing backtest results, so you can analyze them without running the backtest again.  
+For this mode - `--notes "<notes>"` can be used to add notes to the backtest results, which will be shown in the web interface.
+
+### Backtest output file
+
+The output file freqtrade produces is a zip file containing the following files:
+
+- The backtest report in json format
+- the market change data in feather format
+- a copy of the strategy file
+- a copy of the strategy parameters (if a parameter file was used)
+- a sanitized copy of the config file
+
+This will ensure results are reproducible - under the assumption that the same data is available.
+
+Only the strategy file and the config file are included in the zip file, eventual dependencies are not included.
 
 ## Assumptions made by backtesting
 
